@@ -14,6 +14,10 @@
                 v-model="query" 
                 @keyup.enter="fetchWeather" />
         </div>
+        <div class="error-wrap" v-if="weather.message">
+            <div v-if="weather.cod == 400"><span style="font-weight:bold;text-transform:capitalize;">{{weather.message}}:</span> Make sure you entered a city AND country.</div>
+            <div v-if="weather.cod == 404"><span style="font-weight:bold;text-transform:capitalize;">{{weather.message}}:</span> Make sure you spelled your entry correctly.</div>
+        </div>
         <div class="weather-wrap" v-if="typeof weather.main != 'undefined'">
             <div class="location-box">
                 <div class="location">{{weather.name}}, {{weather.sys.country}}</div>
