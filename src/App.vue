@@ -1,5 +1,5 @@
 <template>
-  <div id="app" :class="typeof weather.main != 'undefined' && weather.main.temp > 78 ? 'warm' : ''">
+<div id="app" :class="computedClasses">
     <main>
         <div class="search-box">
             <input 
@@ -32,6 +32,24 @@ export default {
           url_base: "https://api.openweathermap.org/data/2.5/",
           query: '',
           weather: {}
+      }
+  },
+  computed: {
+      computedClasses () {
+          let classes = 'default';
+          if( typeof( this.weather.main ) != 'undefined' ) {
+              // temp
+              classes = this.weather.main.temp > 72 ? 'warm' : 'cool';
+              // clouds
+              classes += this.weather.weather[0].main == "Clouds" ? ' cloudy' : '';
+              // rain
+              classes += this.weather.weather[0].main == "Rain" ? ' rain' : '';
+              // lightning
+              classes += this.weather.weather[0].main == "Thunderstorm" ? ' lightning' : '';
+              // snow
+              classes += this.weather.weather[0].main == "Snow" ? ' snow' : '';
+          }
+          return classes;
       }
   },
   methods: {
