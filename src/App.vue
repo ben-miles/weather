@@ -1894,7 +1894,14 @@ export default {
           let month = months[d.getMonth()];
           let year = d.getFullYear();
 
-          return `${day} ${date} ${month} ${year}`;
+          return `${day}, ${month} ${date}, ${year}`;
+      }
+  },
+  filters: {
+      icon: function (code) {
+          if (!code) return '';
+          let url = 'http://openweathermap.org/img/wn/' + code + '@4x.png';
+          return url;
       }
   }
 }
