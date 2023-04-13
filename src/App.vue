@@ -1,9 +1,10 @@
 <script>
+const openweathermap_key = import.meta.env.VITE_OPENWEATHERMAP_KEY;
 export default {
   name: 'App',
   data () {
       return {
-          api_key: '51ea9ae87e1e6e61855dd280d136f933',
+          api_key: openweathermap_key,
           url_base: "https://api.openweathermap.org/data/2.5/",
           query: '',
           weather: {}
