@@ -5,8 +5,12 @@ export default {
   data () {
       return {
           api_key: openweathermap_key,
-          url_base: "https://api.openweathermap.org/data/2.5/",
-          query: '',
+          api_url_geocode: "https://api.openweathermap.org/geo/1.0/direct?limit=5&q=",
+          api_url_current: "https://api.openweathermap.org/data/2.5/weather?units=imperial&",
+          api_url_forecast: "https://api.openweathermap.org/data/2.5/forecast?lat=44.34&lon=10.99",
+          location: '',
+		  locations: '',
+		  query: '',
           weather: {}
       }
   },
@@ -26,11 +30,16 @@ export default {
               classes += this.weather.weather[0].main == "Snow" ? ' snow' : '';
           }
           return classes;
+      },
+	  icon (code) {
+          if (!this.weather.weather[0].icon) return '';
+          let url = 'https://openweathermap.org/img/wn/' + this.weather.weather[0].icon + '@2x.png';
+          return url;
       }
   },
   methods: {
-      fetchWeather () {
-          fetch(`${this.url_base}weather?q=${this.query}&units=imperial&APPID=${this.api_key}`)
+	getCoordinates () {
+          fetch(`${this.api_url_geocode}${this.query}&APPID=${this.api_key}`)
           .then(res => {
               if (!res.ok) {
                   console.log(res.statusText);
@@ -38,13 +47,36 @@ export default {
               }
               return res.json();
           })
+          .then(this.setLocations);
+      },
+      getWeather () {
+          fetch(`${this.api_url_current}${this.location}&APPID=${this.api_key}`)
+          .then(res => {
+              if (!res.ok) {
+				if(res.statusText.length != 0){
+					console.log(res.statusText);
+				} else {
+					console.error('Empty response');
+				}
+				// throw Error(res.statusText);
+              }
+              return res.json();
+          })
           .then(this.setResults);
       },
       setResults (results) {
           this.weather = results;
-          console.log(results);
-          console.log(results.message)
+        //   console.log(results);
+        //   console.log(results.message)
       },
+	  setLocations (locations) {
+          this.locations = locations;
+          console.log(this.locations);
+        //   console.log(results.message)
+      },
+	  alert () {
+		console.log('alert');
+	  },
       dateBuilder () {
           let d = new Date();
           let months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -57,13 +89,6 @@ export default {
 
           return `${day}, ${month} ${date}, ${year}`;
       }
-  },
-  filters: {
-      icon: function (code) {
-          if (!code) return '';
-          let url = 'http://openweathermap.org/img/wn/' + code + '@4x.png';
-          return url;
-      }
   }
 }
 </script>
@@ -71,6 +96,9 @@ export default {
 <template>
 	<div id="app" :class="computedClasses">
 		<main>
+			<select v-if="locations.length>0" v-model="location" name="locations" id="locations" size="5" @change="getWeather">
+				<option v-for="location in locations" :value="'lat=' + location.lat + '&lon=' + location.lon">{{ location.name }}, {{ location.state }}, {{ location.country }}</option>
+			</select>
 			<div class="search-wrap">
 				<label for="search">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
@@ -82,7 +110,7 @@ export default {
 					id="search" 
 					placeholder="Location (ex: 'Los Angeles, CA, US')" 
 					v-model="query" 
-					@keyup.enter="fetchWeather" />
+					@keyup.enter="getCoordinates" />
 			</div>
 			<div class="error-wrap" v-if="weather.message">
 				<div v-if="weather.cod == 400"><span style="font-weight:bold;text-transform:capitalize;">{{weather.message}}:</span> Make sure you entered a city AND country.</div>
@@ -102,7 +130,7 @@ export default {
 					{{ dateBuilder() }}
 				</div>
 				<div class="weather">
-					<img v-bind:src="weather.weather[0].icon | icon">
+					<img v-bind:src="this.icon">
 					{{weather.weather[0].main}}
 				</div>
 				<div class="temp">
