@@ -2065,6 +2065,7 @@ body {
 .search-wrap label {
     padding: 5px;
     position: absolute;
+	left: 0;
     width: 43px;
 }
 @media ( min-width: 1170px ) {
