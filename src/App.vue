@@ -43,8 +43,8 @@ export default {
           .then(res => {
               if (!res.ok) {
                   console.log(res.statusText);
+			}
                 // throw Error(res.statusText);
-              }
               return res.json();
           })
           .then(this.setLocations);
@@ -55,8 +55,6 @@ export default {
               if (!res.ok) {
 				if(res.statusText.length != 0){
 					console.log(res.statusText);
-				} else {
-					console.error('Empty response');
 				}
 				// throw Error(res.statusText);
               }
@@ -66,13 +64,9 @@ export default {
       },
       setResults (results) {
           this.weather = results;
-        //   console.log(results);
-        //   console.log(results.message)
       },
 	  setLocations (locations) {
           this.locations = locations;
-          console.log(this.locations);
-        //   console.log(results.message)
       },
 	  alert () {
 		console.log('alert');
