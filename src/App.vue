@@ -39,15 +39,15 @@ export default {
   },
   methods: {
 	getCoordinates () {
-          fetch(`${this.api_url_geocode}${this.query}&APPID=${this.api_key}`)
-          .then(res => {
-              if (!res.ok) {
-                  console.log(res.statusText);
+		fetch(`${this.api_url_geocode}${this.query}&APPID=${this.api_key}`)
+		.then(res => {
+			if (!res.ok) {
+				console.log(res.statusText);
+				// throw Error(res.statusText);
 			}
-                // throw Error(res.statusText);
-              return res.json();
-          })
-          .then(this.setLocations);
+			return res.json();
+		})
+		.then(this.setLocations);
       },
       getWeather () {
           fetch(`${this.api_url_current}${this.location}&APPID=${this.api_key}`)
@@ -88,64 +88,71 @@ export default {
 </script>
 
 <template>
-	<div id="app" :class="computedClasses">
-		<main>
-			<select v-if="locations.length>0" v-model="location" name="locations" id="locations" size="5" @change="getWeather">
-				<option v-for="location in locations" :value="'lat=' + location.lat + '&lon=' + location.lon">{{ location.name }}, {{ location.state }}, {{ location.country }}</option>
-			</select>
-			<div class="search-wrap">
-				<label for="search">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
-						<path fill="rgba(0,0,0,0.5)" d="M 21 3 C 11.601563 3 4 10.601563 4 20 C 4 29.398438 11.601563 37 21 37 C 24.355469 37 27.460938 36.015625 30.09375 34.34375 L 42.375 46.625 L 46.625 42.375 L 34.5 30.28125 C 36.679688 27.421875 38 23.878906 38 20 C 38 10.601563 30.398438 3 21 3 Z M 21 7 C 28.199219 7 34 12.800781 34 20 C 34 27.199219 28.199219 33 21 33 C 13.800781 33 8 27.199219 8 20 C 8 12.800781 13.800781 7 21 7 Z"></path>
-					</svg>
-				</label>
-				<input 
-					type="text" 
-					id="search" 
-					placeholder="Location (ex: 'Los Angeles, CA, US')" 
-					v-model="query" 
-					@keyup.enter="getCoordinates" />
+
+	<main :class="computedClasses">
+
+		
+		<div class="search-wrap">
+			<label for="search">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
+					<path fill="rgba(0,0,0,0.5)" d="M 21 3 C 11.601563 3 4 10.601563 4 20 C 4 29.398438 11.601563 37 21 37 C 24.355469 37 27.460938 36.015625 30.09375 34.34375 L 42.375 46.625 L 46.625 42.375 L 34.5 30.28125 C 36.679688 27.421875 38 23.878906 38 20 C 38 10.601563 30.398438 3 21 3 Z M 21 7 C 28.199219 7 34 12.800781 34 20 C 34 27.199219 28.199219 33 21 33 C 13.800781 33 8 27.199219 8 20 C 8 12.800781 13.800781 7 21 7 Z"></path>
+				</svg>
+			</label>
+			<input 
+				type="text" 
+				id="search" 
+				placeholder="Location (ex: 'Los Angeles, CA, US')" 
+				v-model="query" 
+				@keyup.enter="getCoordinates" />
+		</div>
+			
+		<select v-if="locations.length>0" v-model="location" name="locations" id="locations" size="5" @change="getWeather">
+			<option v-for="location in locations" :value="'lat=' + location.lat + '&lon=' + location.lon">{{ location.name }}, {{ location.state }}, {{ location.country }}</option>
+		</select>
+
+		<div class="error-wrap" v-if="weather.message">
+			<div v-if="weather.cod == 400"><span style="font-weight:bold;text-transform:capitalize;">{{weather.message}}:</span> Make sure you entered a city AND country.</div>
+			<div v-if="weather.cod == 404"><span style="font-weight:bold;text-transform:capitalize;">{{weather.message}}:</span> Make sure you spelled your entry correctly.</div>
+		</div>
+
+		<div class="weather-wrap" v-if="typeof weather.main != 'undefined'">
+			<div class="location">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+					<path d="M12,2C8.134,2,5,5.134,5,9c0,5,7,13,7,13s7-8,7-13C19,5.134,15.866,2,12,2z M12,11.5c-1.381,0-2.5-1.119-2.5-2.5 c0-1.381,1.119-2.5,2.5-2.5s2.5,1.119,2.5,2.5C14.5,10.381,13.381,11.5,12,11.5z"></path>
+				</svg>
+				{{weather.name}}, {{weather.sys.country}}
 			</div>
-			<div class="error-wrap" v-if="weather.message">
-				<div v-if="weather.cod == 400"><span style="font-weight:bold;text-transform:capitalize;">{{weather.message}}:</span> Make sure you entered a city AND country.</div>
-				<div v-if="weather.cod == 404"><span style="font-weight:bold;text-transform:capitalize;">{{weather.message}}:</span> Make sure you spelled your entry correctly.</div>
+			<div class="date">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+					<path d="M 6 1 L 6 3 L 3 3 L 3 21 L 21 21 L 21 3 L 18 3 L 18 1 L 16 1 L 16 3 L 8 3 L 8 1 L 6 1 z M 5 8 L 19 8 L 19 19 L 5 19 L 5 8 z"></path>
+				</svg>
+				{{ dateBuilder() }}
 			</div>
-			<div class="weather-wrap" v-if="typeof weather.main != 'undefined'">
-				<div class="location">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-						<path d="M12,2C8.134,2,5,5.134,5,9c0,5,7,13,7,13s7-8,7-13C19,5.134,15.866,2,12,2z M12,11.5c-1.381,0-2.5-1.119-2.5-2.5 c0-1.381,1.119-2.5,2.5-2.5s2.5,1.119,2.5,2.5C14.5,10.381,13.381,11.5,12,11.5z"></path>
-					</svg>
-					{{weather.name}}, {{weather.sys.country}}
-				</div>
-				<div class="date">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-						<path d="M 6 1 L 6 3 L 3 3 L 3 21 L 21 21 L 21 3 L 18 3 L 18 1 L 16 1 L 16 3 L 8 3 L 8 1 L 6 1 z M 5 8 L 19 8 L 19 19 L 5 19 L 5 8 z"></path>
-					</svg>
-					{{ dateBuilder() }}
-				</div>
-				<div class="weather">
-					<img v-bind:src="this.icon">
-					{{weather.weather[0].main}}
-				</div>
-				<div class="temp">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-						<path d="M 12 0 C 9.789063 0 8 1.789063 8 4 L 8 11.4375 C 6.222656 12.699219 5 14.691406 5 17 C 5 20.84375 8.15625 24 12 24 C 15.84375 24 19 20.84375 19 17 C 19 14.691406 17.777344 12.699219 16 11.4375 L 16 4 C 16 1.789063 14.210938 0 12 0 Z M 12 2 C 13.191406 2 14 2.808594 14 4 L 14 12.375 L 14.5 12.6875 C 15.96875 13.503906 17 15.164063 17 17 C 17 19.753906 14.753906 22 12 22 C 9.246094 22 7 19.753906 7 17 C 7 15.164063 8.03125 13.503906 9.5 12.6875 L 10 12.375 L 10 4 C 10 2.808594 10.808594 2 12 2 Z M 11 6 L 11 8 L 12 8 L 12 9 L 11 9 L 11 11 L 12 11 L 12 12 L 11 12 L 11 13.65625 C 9.550781 14.085938 8.5 15.414063 8.5 17 C 8.5 18.933594 10.066406 20.5 12 20.5 C 13.933594 20.5 15.5 18.933594 15.5 17 C 15.5 15.414063 14.449219 14.085938 13 13.65625 L 13 6 Z"></path>
-					</svg>
-					<div class="current">Current: <br/>{{ Math.round(weather.main.temp) }}° f</div> 
-					<div class="low">High: <br/>{{ Math.round(weather.main.temp_max) }}° f</div> 
-					<div class="high">Low: <br/>{{ Math.round(weather.main.temp_min) }}° f</div> 
-					<div class="humidity">Humidity: <br/>{{ weather.main.humidity }}%</div>
-					<div class="feelslike">Feels Like: <br/>{{ Math.round(weather.main.feels_like) }}° f</div>
-				</div>
-				<div class="wind">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
-						<path d="M 14.5 4 C 11.479425 4 8.8081275 5.5957106 7.3066406 7.9824219 A 2.0002 2.0002 0 1 0 10.693359 10.111328 C 11.491873 8.8420395 12.880575 8 14.5 8 C 17.049111 8 19.063939 10.049201 18.998047 12.621094 C 18.935414 15.054236 16.747086 17 14.199219 17 L 5 17 A 2.0002 2.0002 0 1 0 5 21 L 14.199219 21 C 18.801352 21 22.87668 17.437514 22.998047 12.722656 C 23.120155 7.9565495 19.244889 4 14.5 4 z M 37 7 C 33.24811 7 29.954961 9.0827278 28.25 12.160156 A 2.0007172 2.0007172 0 1 0 31.75 14.099609 C 32.773039 12.253038 34.72389 11 37 11 C 40.461092 11 43.200084 13.849073 42.988281 17.373047 C 42.797712 20.543764 39.964974 23 36.6875 23 L 5 23 A 2.0002 2.0002 0 1 0 5 27 L 36.6875 27 C 41.976026 27 46.657038 22.994565 46.980469 17.613281 C 47.326666 11.853255 42.702908 7 37 7 z M 5 29 A 2.0002 2.0002 0 1 0 5 33 L 24.199219 33 C 26.747086 33 28.935414 34.945764 28.998047 37.378906 C 29.063939 39.950799 27.049111 42 24.5 42 C 22.880575 42 21.491873 41.157961 20.693359 39.888672 A 2.0002 2.0002 0 1 0 17.306641 42.017578 C 18.808127 44.404289 21.479425 46 24.5 46 C 29.244889 46 33.120155 42.043451 32.998047 37.277344 C 32.87668 32.562486 28.801352 29 24.199219 29 L 5 29 z"></path>
-					</svg>
-					<div class="direction">Direction: <br/>{{ weather.wind.deg }}°</div>
-					<div class="speed">Wind Speed: <br/>{{ Math.round(weather.wind.speed * 10) / 10 }}mph</div>
-				</div>
+			<div class="weather">
+				<img v-bind:src="this.icon">
+				{{weather.weather[0].main}}
 			</div>
-		</main>
+			<div class="temp">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+					<path d="M 12 0 C 9.789063 0 8 1.789063 8 4 L 8 11.4375 C 6.222656 12.699219 5 14.691406 5 17 C 5 20.84375 8.15625 24 12 24 C 15.84375 24 19 20.84375 19 17 C 19 14.691406 17.777344 12.699219 16 11.4375 L 16 4 C 16 1.789063 14.210938 0 12 0 Z M 12 2 C 13.191406 2 14 2.808594 14 4 L 14 12.375 L 14.5 12.6875 C 15.96875 13.503906 17 15.164063 17 17 C 17 19.753906 14.753906 22 12 22 C 9.246094 22 7 19.753906 7 17 C 7 15.164063 8.03125 13.503906 9.5 12.6875 L 10 12.375 L 10 4 C 10 2.808594 10.808594 2 12 2 Z M 11 6 L 11 8 L 12 8 L 12 9 L 11 9 L 11 11 L 12 11 L 12 12 L 11 12 L 11 13.65625 C 9.550781 14.085938 8.5 15.414063 8.5 17 C 8.5 18.933594 10.066406 20.5 12 20.5 C 13.933594 20.5 15.5 18.933594 15.5 17 C 15.5 15.414063 14.449219 14.085938 13 13.65625 L 13 6 Z"></path>
+				</svg>
+				<div class="current">Current: <br/>{{ Math.round(weather.main.temp) }}° f</div> 
+				<div class="low">High: <br/>{{ Math.round(weather.main.temp_max) }}° f</div> 
+				<div class="high">Low: <br/>{{ Math.round(weather.main.temp_min) }}° f</div> 
+				<div class="humidity">Humidity: <br/>{{ weather.main.humidity }}%</div>
+				<div class="feelslike">Feels Like: <br/>{{ Math.round(weather.main.feels_like) }}° f</div>
+			</div>
+			<div class="wind">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
+					<path d="M 14.5 4 C 11.479425 4 8.8081275 5.5957106 7.3066406 7.9824219 A 2.0002 2.0002 0 1 0 10.693359 10.111328 C 11.491873 8.8420395 12.880575 8 14.5 8 C 17.049111 8 19.063939 10.049201 18.998047 12.621094 C 18.935414 15.054236 16.747086 17 14.199219 17 L 5 17 A 2.0002 2.0002 0 1 0 5 21 L 14.199219 21 C 18.801352 21 22.87668 17.437514 22.998047 12.722656 C 23.120155 7.9565495 19.244889 4 14.5 4 z M 37 7 C 33.24811 7 29.954961 9.0827278 28.25 12.160156 A 2.0007172 2.0007172 0 1 0 31.75 14.099609 C 32.773039 12.253038 34.72389 11 37 11 C 40.461092 11 43.200084 13.849073 42.988281 17.373047 C 42.797712 20.543764 39.964974 23 36.6875 23 L 5 23 A 2.0002 2.0002 0 1 0 5 27 L 36.6875 27 C 41.976026 27 46.657038 22.994565 46.980469 17.613281 C 47.326666 11.853255 42.702908 7 37 7 z M 5 29 A 2.0002 2.0002 0 1 0 5 33 L 24.199219 33 C 26.747086 33 28.935414 34.945764 28.998047 37.378906 C 29.063939 39.950799 27.049111 42 24.5 42 C 22.880575 42 21.491873 41.157961 20.693359 39.888672 A 2.0002 2.0002 0 1 0 17.306641 42.017578 C 18.808127 44.404289 21.479425 46 24.5 46 C 29.244889 46 33.120155 42.043451 32.998047 37.277344 C 32.87668 32.562486 28.801352 29 24.199219 29 L 5 29 z"></path>
+				</svg>
+				<div class="direction">Direction: <br/>{{ weather.wind.deg }}°</div>
+				<div class="speed">Wind Speed: <br/>{{ Math.round(weather.wind.speed * 10) / 10 }}mph</div>
+			</div>
+		</div>
+
+	<!-- </main> -->
+
 		<svg version="1.1" id="scene" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 1280 1050" enable-background="new 0 0 1280 1050" xml:space="preserve">
 			<defs>
 				<linearGradient id="sky_cool" gradientUnits="userSpaceOnUse" x1="820.416" y1="1652.6748" x2="820.416" y2="2256.9028" gradientTransform="matrix(1 0 0 -1 -180 2260)">
@@ -1951,7 +1958,9 @@ export default {
 				c0.404-0.907,0-2.031-0.908-2.435c-0.909-0.404-2.02,0-2.423,0.913l-10.096,22.966C401.127,943.041,401.53,944.055,402.439,944.458
 				z"/>
 		</svg>
-	</div>
+
+	</main>
+
 </template>
 
 <style>
@@ -1973,7 +1982,6 @@ html, body {
     position: relative;
 }
 main {
-    min-height: 100vh;
     padding: 25px;
 }
 
@@ -2004,49 +2012,49 @@ body {
 #scene path {
     transition: opacity .2s ease-in-out;
 }
-#app.warm #sky {
-    fill: url(#sky_warm);
+.warm #sky {
+    fill: url(#sky_warm) !important;
 }
-#app.warm #far-hill-left {
+.warm #far-hill-left {
     fill: url(#far-hill-left_warm);
 }
-#app.warm #far-hill-right {
+.warm #far-hill-right {
     fill: url(#far-hill-right_warm);
 }
-#app.warm #near-hill-left {
+.warm #near-hill-left {
     fill: url(#near-hill-left_warm);
 }
-#app.warm #near-hill-right {
+.warm #near-hill-right {
     fill: url(#near-hill-right_warm);
 }
-#app.warm #water {
+.warm #water {
     fill: url(#water_warm);
 }
-#app.cloudy #clouds-1 {
+.cloudy #clouds-1 {
     opacity: 1;
 }
-#app.cloudy #clouds-2 {
+.cloudy #clouds-2 {
     opacity: 1;
 }
-#app.rain #clouds-1 {
+.rain #clouds-1 {
     opacity: 1;
 }
-#app.rain #clouds-2 {
+.rain #clouds-2 {
     opacity: 1;
 }
-#app.rain #rain {
+.rain #rain {
     opacity: 0.8;
 }
-#app.lightning #lightning {
+.lightning #lightning {
     opacity: 1;
 }
-#app.snow #clouds-1 {
+.snow #clouds-1 {
     opacity: 1;
 }
-#app.snow #clouds-2 {
+.snow #clouds-2 {
     opacity: 1;
 }
-#app.snow #snow {
+.snow #snow {
     opacity: 1;
 }
 
@@ -2090,6 +2098,27 @@ body {
         padding: 15px;
         padding-left: 60px;
     }
+}
+
+/* LOCATIONS SELECT */
+select#locations {
+	display: block;
+    width: 100%;
+    color: rgba(0,0,0,0.6);
+    font-family: inherit;
+    font-size: 18px;
+	font-weight: 400;
+    appearance: none;
+    border: 2px solid rgba(0,0,0,0.6);
+    outline: none;
+    background-color: rgba(255,255,255,0.6);
+    border-radius: 0 0 5px 5px;
+	margin: -27px auto 25px;
+    transition: 0.4s ease-in-out;
+	overflow-y: auto;
+}
+#locations option {
+	padding: 5px 5px 5px 60px;
 }
 
 /* WEATHER DATA */
