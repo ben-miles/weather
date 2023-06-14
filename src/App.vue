@@ -39,15 +39,22 @@ export default {
   },
   methods: {
 	getCoordinates () {
-		fetch(`${this.api_url_geocode}${this.query}&APPID=${this.api_key}`)
-		.then(res => {
-			if (!res.ok) {
-				console.log(res.statusText);
-				// throw Error(res.statusText);
+		// only fetch after 2 seconds of no typing
+		setTimeout(() => {
+			if(this.query.length > 0){
+				fetch(`${this.api_url_geocode}${this.query}&APPID=${this.api_key}`)
+					.then(res => {
+						if (!res.ok) {
+							console.log(res.statusText);
+							// throw Error(res.statusText);
+						}
+						return res.json();
+					})
+					.then(this.setLocations);
+			} else {
+				this.locations = '';
 			}
-			return res.json();
-		})
-		.then(this.setLocations);
+		}, 1000);
       },
       getWeather () {
           fetch(`${this.api_url_current}${this.location}&APPID=${this.api_key}`)
@@ -104,7 +111,7 @@ export default {
 				id="search" 
 				placeholder="Location (ex: 'Los Angeles, CA, US')" 
 				v-model="query" 
-				@keyup.enter="getCoordinates" />
+				@input="getCoordinates" />
 		</div>
 			
 		<select v-if="locations.length>0" v-model="location" name="locations" id="locations" size="5" @change="getWeather">
