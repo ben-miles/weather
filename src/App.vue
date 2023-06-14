@@ -99,7 +99,6 @@ export default {
 <template>
 
 	<main :class="computedClasses">
-
 		
 		<div class="search-wrap">
 			<label for="search">
@@ -2097,9 +2096,9 @@ body {
     font-family: inherit;
     font-size: 20px;
     appearance: none;
-    border: 2px solid rgba(0,0,0,0.6);
+    border: none;
     outline: none;
-    background-color: rgba(255,255,255,0.6);
+    background-color: #fff;
     border-radius: 5px;
     transition: 0.4s ease-in-out;
 }
@@ -2108,6 +2107,9 @@ body {
         padding: 15px;
         padding-left: 60px;
     }
+}
+#search:has(+ select#locations) {
+	border-radius: 5px 5px 0 0;
 }
 
 /* LOCATIONS SELECT */
@@ -2119,9 +2121,9 @@ select#locations {
     font-size: 18px;
 	font-weight: 400;
     appearance: none;
-    border: 2px solid rgba(0,0,0,0.6);
+    border: none;
     outline: none;
-    background-color: rgba(255,255,255,0.6);
+    background-color: #fff;
     border-radius: 0 0 5px 5px;
 	margin: -27px auto 25px;
     transition: 0.4s ease-in-out;
