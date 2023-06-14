@@ -67,7 +67,9 @@ export default {
               }
               return res.json();
           })
-          .then(this.setResults);
+          .then(this.setResults)
+		  // Clear the <select> so it is hidden again
+		  .then(this.locations = '')
       },
       setResults (results) {
           this.weather = results;
