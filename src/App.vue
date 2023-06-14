@@ -99,6 +99,7 @@ export default {
 				</svg>
 			</label>
 			<input 
+				autocomplete="off" 
 				type="text" 
 				id="search" 
 				placeholder="Location (ex: 'Los Angeles, CA, US')" 
